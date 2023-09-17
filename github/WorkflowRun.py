@@ -263,18 +263,31 @@ class WorkflowRun(CompletableGithubObject):
         """
         :calls "`GET /repos/{owner}/{repo}/actions/runs/{run_id}/jobs <https://docs.github.com/en/rest/reference/actions#list-jobs-for-a-workflow-run>`_
         :param _filter: string `latest`, or `all`
+
+        OR (if attempt number is > 1)
+        :calls "`GET /repos/{owner}/{repo}/actions/runs/{run_id}/attemps/ATTEMPT_NUMBER/jobs <https://docs.github.com/en/rest/reference/actions#list-jobs-for-a-workflow-run>`_
+        :param _filter: string `latest`, or `all`
         """
         assert is_optional(_filter, str), _filter
 
         url_parameters = NotSet.remove_unset_items({"filter": _filter})
 
-        return PaginatedList(
-            github.WorkflowJob.WorkflowJob,
-            self._requester,
-            self.jobs_url,
-            url_parameters,
-            list_item="jobs",
-        )
+        if self.run_attempt > 1:
+            return PaginatedList(
+                github.WorkflowJob.WorkflowJob,
+                self._requester,
+                f"{self.url}/attempts/{self.run_attempt}/jobs",
+                url_parameters,
+                list_item="jobs",
+            )
+        else:
+            return PaginatedList(
+                github.WorkflowJob.WorkflowJob,
+                self._requester,
+                self.jobs_url,
+                url_parameters,
+                list_item="jobs",
+            )
 
     def _useAttributes(self, attributes: dict[str, Any]) -> None:
         if "id" in attributes:  # pragma no branch

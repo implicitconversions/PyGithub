@@ -3438,6 +3438,20 @@ class Repository(github.GithubObject.CompletableGithubObject):
         assert isinstance(id_, int)
         headers, data = self._requester.requestJsonAndCheck("GET", f"{self.url}/actions/runs/{id_}")
         return github.WorkflowRun.WorkflowRun(self._requester, headers, data, completed=True)
+    
+    def get_workflow_run_attempt(self, id_, attempt_):
+        """
+        :calls `/repos/{owner}/{repo}/actions/runs/{run_id}/attempts/{attempt_number} <https://docs.github.com/en/rest/reference/actions#workflow-runs>`_
+        :param id_: int
+        :param attempt_ int
+
+        :rtype: :class:`github.WorkflowRun.WorkflowRun`
+        """
+
+        assert isinstance(id_, int)
+        assert isinstance(attempt_, int)
+        headers, data = self._requester.requestJsonAndCheck("GET", f"{self.url}/actions/runs/{id_}/attempts/{attempt_}")
+        return github.WorkflowRun.WorkflowRun(self._requester, headers, data, completed=True)
 
     def has_in_assignees(self, assignee):
         """
